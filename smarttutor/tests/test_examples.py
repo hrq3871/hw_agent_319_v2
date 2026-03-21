@@ -1,3 +1,8 @@
+import os
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from agents.answer_generator import answer_generator
 from agents.conversation import conversation_manager
 from agents.guardrail_agent import guardrail_agent
@@ -13,7 +18,7 @@ def test_math_example_is_accepted(monkeypatch):
     monkeypatch.setattr(
         triage_agent,
         "classify_sync",
-        lambda question: {
+        lambda question, **kwargs: {
             "category": "valid_math",
             "intent": "ask_question",
             "reason": "math_homework",
@@ -34,7 +39,7 @@ def test_history_example_is_accepted(monkeypatch):
     monkeypatch.setattr(
         triage_agent,
         "classify_sync",
-        lambda question: {
+        lambda question, **kwargs: {
             "category": "valid_history",
             "intent": "ask_question",
             "reason": "history_homework",
@@ -59,7 +64,7 @@ def test_valid_math_uses_only_explicit_guardrail_rules(monkeypatch):
     monkeypatch.setattr(
         triage_agent,
         "classify_sync",
-        lambda question: {
+        lambda question, **kwargs: {
             "category": "valid_math",
             "intent": "ask_question",
             "reason": "calculus_homework",
@@ -85,7 +90,7 @@ def test_valid_math_can_still_be_rejected_by_explicit_rules(monkeypatch):
     monkeypatch.setattr(
         triage_agent,
         "classify_sync",
-        lambda question: {
+        lambda question, **kwargs: {
             "category": "valid_math",
             "intent": "ask_question",
             "reason": "contains_dangerous_content",
@@ -113,7 +118,7 @@ def test_non_homework_is_rejected(monkeypatch):
     monkeypatch.setattr(
         triage_agent,
         "classify_sync",
-        lambda question: {
+        lambda question, **kwargs: {
             "category": "invalid",
             "intent": "ask_question",
             "reason": "non_homework",
@@ -137,7 +142,7 @@ def test_too_local_question_is_rejected(monkeypatch):
     monkeypatch.setattr(
         triage_agent,
         "classify_sync",
-        lambda question: {
+        lambda question, **kwargs: {
             "category": "invalid",
             "intent": "ask_question",
             "reason": "too_local",
@@ -161,7 +166,7 @@ def test_grade_info_is_handled_before_guardrail(monkeypatch):
     monkeypatch.setattr(
         triage_agent,
         "classify_sync",
-        lambda question: {
+        lambda question, **kwargs: {
             "category": "invalid",
             "intent": "grade_info",
             "reason": "grade_info",
@@ -184,7 +189,7 @@ def test_summary_request_is_handled_before_guardrail(monkeypatch):
     monkeypatch.setattr(
         triage_agent,
         "classify_sync",
-        lambda question: {
+        lambda question, **kwargs: {
             "category": "invalid",
             "intent": "summarize",
             "reason": "summarize",
@@ -199,7 +204,7 @@ def test_summary_request_is_handled_before_guardrail(monkeypatch):
     monkeypatch.setattr(
         answer_generator,
         "generate_summary",
-        lambda session_id: {
+        lambda *args, **kwargs: {
             "summary": "We discussed math and history.",
             "topics_discussed": ["math", "history"],
         },
@@ -238,7 +243,7 @@ def test_chitchat_is_handled_before_guardrail(monkeypatch):
     def fail_guardrail(question):
         raise AssertionError("guardrail should not run for simple chit-chat")
 
-    monkeypatch.setattr(triage_agent, "classify_sync", lambda question: next(triage_results))
+    monkeypatch.setattr(triage_agent, "classify_sync", lambda question, **kwargs: next(triage_results))
     monkeypatch.setattr(guardrail_agent, "check_sync", fail_guardrail)
 
     thanks_result = orchestrator.process_message("That's helpful, thank you", "session-chitchat")
@@ -277,7 +282,7 @@ def test_non_homework_invalid_questions_still_use_guardrail_even_if_labeled_chit
         ]
     )
 
-    monkeypatch.setattr(triage_agent, "classify_sync", lambda question: next(triage_results))
+    monkeypatch.setattr(triage_agent, "classify_sync", lambda question, **kwargs: next(triage_results))
     monkeypatch.setattr(guardrail_agent, "check_sync", lambda question: next(guardrail_results))
 
     travel_result = orchestrator.process_message("How do I get to London?", "session-invalid-chitchat")

@@ -24,6 +24,7 @@ SmartTutor should:
 - answer math homework questions such as algebra, calculus, or word problems,
 - answer history homework questions about historical people, events, and time periods,
 - remember conversation context so short follow-up questions continue the previous explanation,
+- generate practice questions when the user asks for exercises about the current math or history topic,
 - remember user grade information and adapt answer depth,
 - summarize the conversation on request,
 - politely reject prompts that are not math or history homework,
@@ -53,6 +54,7 @@ The current active flow is:
 4. Special intents are handled before guardrails:
    - grade sharing updates the stored user level,
    - summary requests trigger summary generation,
+   - practice requests generate topic-aligned exercises,
    - simple chit-chat receives a short polite response.
 5. For normal questions, `guardrail_agent` applies scope and safety checks.
 6. If accepted, `answer_generator` builds the subject prompt, includes recent conversation context, and generates the response.
@@ -113,6 +115,7 @@ It currently supports:
 
 - short contextual follow-ups such as `Why subtract 1 on both sides?`,
 - short history follow-ups such as `And more?`,
+- contextual exercise requests such as `Give me 3 practice questions about this`,
 - summary refinement turns,
 - grade updates mid-conversation,
 - non-academic social turns such as greeting, thanks, and goodbye.
@@ -142,6 +145,7 @@ The tests cover:
 - accepted math and history questions,
 - rejected non-homework and too-local questions,
 - follow-up continuation,
+- contextual practice-question generation,
 - summary requests,
 - grade adaptation,
 - low-grade advanced-math handling,
@@ -151,10 +155,12 @@ The tests cover:
 
 ### Manual Smoke Test
 
-Use one session and send the following turns in order:
+Use the following short demo sessions:
 
 ```text
 Assistant: Welcome to SmartTutor, your homework tutor for math and history. What can I help you with today?
+
+Session A: accepted questions, follow-up, and practice
 
 User: Hi
 Assistant: A brief greeting. It should not reject the message.
@@ -165,17 +171,24 @@ Assistant: Accept as math and solve it.
 User: Why subtract 1 on both sides?
 Assistant: Continue the same math context instead of rejecting the follow-up.
 
+User: Give me 3 practice questions about this.
+Assistant: Generate three related math practice questions with short hints.
+
 User: Who was the first president of France?
 Assistant: Accept as history and answer correctly.
 
 User: And more?
 Assistant: Continue the previous history context rather than rejecting the short follow-up.
 
+Session B: rejected questions
+
 User: How do I get to London?
 Assistant: Reject because this is travel advice, not math or history homework.
 
 User: Who was HKUST's first president?
 Assistant: Reject because it is too local or niche for the intended history-homework scope.
+
+Session C: grade adaptation and summary
 
 User: I am a primary school student.
 Assistant: Store the grade level.
@@ -194,6 +207,7 @@ This scenario is short enough for a report or demo, while still demonstrating:
 
 - two accepted cases,
 - two rejected cases,
+- one contextual practice-generation case,
 - one summary request,
 - contextual follow-up handling,
 - low-grade advanced-topic handling,
@@ -229,7 +243,7 @@ python -m ui.gradio_app
 Open:
 
 ```text
-http://127.0.0.1:7861
+the local URL shown in the terminal, usually http://127.0.0.1:7861
 ```
 
 Optional API server:

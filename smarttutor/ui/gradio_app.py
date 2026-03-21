@@ -57,6 +57,20 @@ def greet() -> str:
     return "Welcome to SmartTutor. I can help with math and history homework questions."
 
 
+def _resolve_server_port() -> Optional[int]:
+    raw_port = os.getenv("GRADIO_SERVER_PORT")
+    if raw_port is None or not raw_port.strip():
+        return None
+    return int(raw_port)
+
+
+def _resolve_server_name() -> str:
+    raw_name = os.getenv("GRADIO_SERVER_NAME")
+    if raw_name is None or not raw_name.strip():
+        return "127.0.0.1"
+    return raw_name.strip()
+
+
 def build_demo():
     if gr is None:
         raise RuntimeError("gradio is not installed")
@@ -96,4 +110,9 @@ if __name__ == "__main__":
         raise SystemExit("gradio is not installed")
 
     init_session()
-    demo.launch(server_name="0.0.0.0", server_port=7861, show_api=False, share=False)
+    demo.launch(
+        server_name=_resolve_server_name(),
+        server_port=_resolve_server_port(),
+        show_api=False,
+        share=False,
+    )

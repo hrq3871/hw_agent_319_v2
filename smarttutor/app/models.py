@@ -20,6 +20,8 @@ class UserIntent(str, Enum):
     SUMMARIZE = "summarize"
     GRADE_INFO = "grade_info"
     CHIT_CHAT = "chit_chat"
+    FOLLOW_UP = "follow_up"
+    PRACTICE_REQUEST = "practice_request"
 
 
 class ChatRequest(BaseModel):
