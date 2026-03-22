@@ -11,10 +11,9 @@ The validation strategy is intentionally simple and reproducible:
 
 ## Validation Baseline
 
-- Project path: `d:\HKUST\Artificial Intelligent\project\hw_agent_319_v2\smarttutor`
 - Active branch: `feat/reliability-guardrails-polish`
-- Verification date: March 21, 2026
-- Fresh automated test result: `37 passed in 9.71s`
+- Verification date: March 22, 2026
+- Test result: 37 tests available in this directory
 - Validation mode: mock-first tests plus a small real manual smoke test
 
 This is not a claim that SmartTutor is a general-purpose tutor. It is evidence that the current system behaves correctly on the narrow homework-tutor scope required by the project.
@@ -40,16 +39,16 @@ We need evidence for these behaviors:
 
 | Requirement | Automated evidence | Manual smoke evidence | Status |
 |---|---|---|---|
-| Accept valid math homework | `tests/test_examples.py`, `tests/test_fallback_rules.py` | `x+1=2` | Passed |
-| Accept valid history homework | `tests/test_examples.py`, `tests/test_fallback_rules.py` | `Who was the first president of France?` | Passed |
-| Reject non-homework prompts | `tests/test_examples.py`, `tests/test_fallback_rules.py` | `How do I get to London?` | Passed |
-| Reject too-local or niche prompts | `tests/test_examples.py`, `tests/test_fallback_rules.py` | `Who was HKUST's first president?` | Passed |
-| Continue multi-turn follow-ups | `tests/test_multiturn_followups.py` | `Why subtract 1 on both sides?`, `And more?` | Passed |
-| Preserve grade info and adapt explanation | `tests/test_examples.py`, `tests/test_multiturn_followups.py`, `tests/test_fallback_rules.py` | `I am a primary school student.` then `What is the derivative of x^2?` | Passed |
-| Summarize the conversation | `tests/test_examples.py`, `test_api.py` | `Summarize our conversation so far.` | Passed |
-| Handle simple polite chit-chat without false rejection | `tests/test_examples.py` | `Hi`, `That's helpful, thank you.` | Passed |
-| Keep UI and API behavior aligned | `tests/test_ui.py`, `test_api.py` | Indirectly covered by demo flow | Passed |
-| Recover from reliability edge cases | `test_agents.py`, `tests/test_fallback_rules.py` | Reflected in stable demo behavior | Passed |
+| Accept valid math homework | `test_examples.py`, `test_fallback_rules.py` | `x+1=2` | Passed |
+| Accept valid history homework | `test_examples.py`, `test_fallback_rules.py` | `Who was the first president of France?` | Passed |
+| Reject non-homework prompts | `test_examples.py`, `test_fallback_rules.py` | `How do I get to London?` | Passed |
+| Reject too-local or niche prompts | `test_examples.py`, `test_fallback_rules.py` | `Who was HKUST's first president?` | Passed |
+| Continue multi-turn follow-ups | `test_multiturn_followups.py` | `Why subtract 1 on both sides?`, `And more?` | Passed |
+| Preserve grade info and adapt explanation | `test_examples.py`, `test_multiturn_followups.py`, `test_fallback_rules.py` | `I am a primary school student.` then `What is the derivative of x^2?` | Passed |
+| Summarize the conversation | `test_examples.py`, `test_api.py` | `Summarize our conversation so far.` | Passed |
+| Handle simple polite chit-chat without false rejection | `test_examples.py` | `Hi`, `That's helpful, thank you.` | Passed |
+| Keep UI and API behavior aligned | `test_ui.py`, `test_api.py` | Indirectly covered by demo flow | Passed |
+| Recover from reliability edge cases | `test_agents.py`, `test_fallback_rules.py` | Reflected in stable demo behavior | Passed |
 
 ## Automated Validation
 
@@ -59,33 +58,25 @@ Run from the `smarttutor` directory:
 pytest -q
 ```
 
-Fresh result on March 21, 2026:
-
-```text
-37 passed in 9.71s
-```
-
 ### What the automated suite covers
 
-- `tests/test_examples.py`
+- `test_examples.py`
   - accepted math and history examples,
   - rejected non-homework and too-local prompts,
   - special handling for `grade_info` and `summarize`,
   - polite chit-chat handling,
   - guardrail behavior when triage labels are imperfect.
-- `tests/test_multiturn_followups.py`
+- `test_multiturn_followups.py`
   - math and history follow-up continuation,
   - clarification after an initial rejection,
   - summary follow-up refinement,
   - short follow-up repair such as `And more?`,
   - low-grade advanced-math behavior.
-- `tests/test_fallback_rules.py`
+- `test_fallback_rules.py`
   - deterministic fallback classification for obvious prompts,
   - Chinese compatibility for grade and summary inputs,
   - rescue when LLM triage is too strict,
   - explicit travel and too-local guardrail rules.
-- `tests/test_ui.py`
-  - Gradio UI delegates to the orchestrator instead of using a separate path.
 - `test_api.py`
   - `/chat` returns `reason`,
   - summary endpoint returns structured summary data.
@@ -93,6 +84,8 @@ Fresh result on March 21, 2026:
   - missing sessions are created automatically,
   - model fallback works when the math model is unavailable,
   - answer generation retries when a younger student asks an advanced but still valid math question.
+- `test_ui.py`
+  - Gradio UI delegates to the orchestrator instead of using a separate path.
 
 ### Why these tests matter
 
@@ -104,7 +97,7 @@ Automated tests show policy consistency. The manual smoke test shows that the fu
 
 Use one session and send the following turns in order:
 
-```text
+```
 User: Hi
 Expected: brief greeting, no rejection
 
@@ -138,8 +131,6 @@ Expected: polite reply, no rejection
 User: Summarize our conversation so far.
 Expected: concise summary of the session
 ```
-
-Current project baseline states that these smoke scenarios have already been manually verified on this branch and are also reflected in `README.md`, `REPORT.md`, and the recent reliability commits.
 
 ## Why This Counts as Evidence
 

@@ -151,7 +151,8 @@ The tests cover:
 - low-grade advanced-math handling,
 - polite chit-chat handling,
 - API field consistency,
-- model fallback behavior.
+- model fallback behavior,
+- UI orchestrator delegation.
 
 ### Manual Smoke Test
 
@@ -212,6 +213,8 @@ This scenario is short enough for a report or demo, while still demonstrating:
 - contextual follow-up handling,
 - low-grade advanced-topic handling,
 - polite chit-chat handling.
+
+For detailed validation evidence and requirement-to-test mapping, see `tests/VALIDATION.md`.
 
 ## Minimal Run Instructions
 
@@ -275,10 +278,14 @@ smarttutor/
 │   ├── prompts.py
 │   ├── models.py
 │   └── main.py
+├── ui/
+│   └── gradio_app.py
 └── tests/
     ├── test_examples.py
     ├── test_fallback_rules.py
     ├── test_multiturn_followups.py
+    ├── test_api.py
+    ├── test_agents.py
     └── test_ui.py
 ```
 
